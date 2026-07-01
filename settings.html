@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#F5F5F7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BlowVPN">
+    
+    <link rel="manifest" href="/manifest.json">
+    
+    <title>BlowVPN - Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #F5F5F7;
+            color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 100%;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Header */
+        .header {
+            background-color: #F5F5F7;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #E5E5EA;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .header-btn:active {
+            background-color: #E5E5EA;
+        }
+
+        .header-btn.close {
+            color: #000;
+        }
+
+        .header-btn.check {
+            background-color: #007AFF;
+            color: white;
+        }
+
+        .header-btn.check:active {
+            background-color: #0051D5;
+        }
+
+        /* Content */
+        .content {
+            padding: 20px;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            padding: 0 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #E5E5EA;
+            margin-bottom: 12px;
+        }
+
+        .form-row {
+            padding: 16px;
+            border-bottom: 1px solid #E5E5EA;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-row:last-child {
+            border-bottom: none;
+        }
+
+        .form-row.interactive {
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .form-row.interactive:active {
+            background-color: #F5F5F7;
+        }
+
+        .form-label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .label-main {
+            font-size: 16px;
+            font-weight: 500;
+            color: #000;
+        }
+
+        .label-sub {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .form-value {
+            font-size: 16px;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-value.selected {
+            color: #007AFF;
+            font-weight: 500;
+        }
+
+        .chevron {
+            color: #C7C7CC;
+            font-size: 20px;
+        }
+
+        /* Input Fields */
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-bottom: 1px solid #E5E5EA;
+            background-color: white;
+            font-size: 16px;
+            font-family: inherit;
+            color: #000;
+        }
+
+        .input-field:last-child {
+            border-bottom: none;
+        }
+
+        .input-field::placeholder {
+            color: #999;
+        }
+
+        .input-field:focus {
+            outline: none;
+            background-color: #F5F5F7;
+        }
+
+        .label-text {
+            padding: 16px;
+            font-size: 13px;
+            color: #999;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Select Dropdown */
+        .select-wrapper {
+            position: relative;
+            padding: 12px 16px;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            background-color: white;
+            font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0 center;
+            background-size: 20px;
+            padding-right: 30px;
+        }
+
+        /* Segmented Control */
+        .segmented-control {
+            display: flex;
+            gap: 8px;
+            padding: 16px;
+            background-color: white;
+            border-radius: 12px;
+            border: 1px solid #E5E5EA;
+        }
+
+        .segment-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #F5F5F7;
+            color: #666;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .segment-btn.active {
+            background-color: #E5E5EA;
+            color: #000;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 300;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 100%;
+            border-radius: 20px 20px 0 0;
+            padding: 0;
+            animation: slideUp 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #E5E5EA;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 16px;
+        }
+
+        .modal-footer {
+            padding: 16px;
+            display: flex;
+            gap: 12px;
+            border-top: 1px solid #E5E5EA;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #007AFF;
+            color: white;
+        }
+
+        .btn-primary:active {
+            background-color: #0051D5;
+        }
+
+        .btn-secondary {
+            background-color: #F5F5F7;
+            color: #000;
+        }
+
+        .btn-secondary:active {
+            background-color: #E5E5EA;
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            width: 50px;
+            height: 30px;
+            background-color: #E5E5EA;
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: none;
+        }
+
+        .toggle.active {
+            background-color: #34C759;
+        }
+
+        .toggle-circle {
+            width: 26px;
+            height: 26px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: left 0.2s;
+        }
+
+        .toggle.active .toggle-circle {
+            left: 22px;
+        }
+
+        /* Checkbox */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #E5E5EA;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .checkbox.checked {
+            background-color: #007AFF;
+            border-color: #007AFF;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+
+        /* iOS Safe Area */
+        @supports (padding: max(0px)) {
+            .content {
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+        }
+
+        .error {
+            color: #FF3B30;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .success {
+            color: #34C759;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="header-btn close" onclick="closeSettings()">✕</button>
+            <div class="header-title">Настройка</div>
+            <button class="header-btn check" onclick="saveAllSettings()">✓</button>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Configuration Section -->
+            <div class="section">
+                <div class="section-title">Конфигурация</div>
+                
+                <div class="form-group">
+                    <div class="select-wrapper">
+                        <div class="label-text">Тип</div>
+                        <select id="vpnType" onchange="updateType()">
+                            <option value="ikev2">IKEv2</option>
+                            <option value="vless">VLESS</option>
+                            <option value="vmess">VMESS</option>
+                            <option value="ss">Shadowsocks</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" class="input-field" id="description" placeholder="Описание" required>
+                    <input type="text" class="input-field" id="server" placeholder="Сервер" required>
+                    <input type="text" class="input-field" id="remoteId" placeholder="Удаленный ID" required>
+                    <input type="text" class="input-field" id="localId" placeholder="Локальный ID">
+                </div>
+            </div>
+
+            <!-- Authentication Section -->
+            <div class="section">
+                <div class="section-title">Аутентификация</div>
+                
+                <div class="form-group">
+                    <div class="form-row interactive" onclick="showAuthTypes()">
+                        <div class="form-label">
+                            <span class="label-main">Аутентификация</span>
+                            <span class="label-sub">Имя пользователя</span>
+                        </div>
+                        <div class="form-value">
+                            <span id="authTypeDisplay">Имя пользователя</span>
+                            <span class="chevron">›</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" class="input-field" id="username" placeholder="Имя пользователя" required>
+                    <input type="password" class="input-field" id="password" placeholder="Пароль" required>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-wrapper">
+                        <div class="checkbox" id="rememberCheckbox" onclick="toggleRemember()"></div>
+                        <label class="form-label" style="margin: 0; flex-direction: row;">
+                            <span class="label-main">Пароль</span>
+                            <span class="label-sub">спрашивать всегда</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proxy Section -->
+            <div class="section">
+                <div class="section-title">Прокси</div>
+                
+                <div class="form-group">
+                    <div class="segmented-control">
+                        <button class="segment-btn active" onclick="setProxyType('manual')">Вы́кл.</button>
+                        <button class="segment-btn" onclick="setProxyType('manual')">Вручную</button>
+                        <button class="segment-btn" onclick="setProxyType('auto')">Авто</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Type Modal -->
+    <div class="modal" id="authTypeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Аутентификация</div>
+                <button class="header-btn" onclick="closeModal('authTypeModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="form-row interactive" onclick="selectAuthType('username')">
+                        <span class="label-main">Имя пользователя</span>
+                        <span id="authCheck1" style="color: #007AFF; font-weight: 600;">✓</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let settings = {
+            type: 'ikev2',
+            description: '',
+            server: '',
+            remoteId: '',
+            localId: '',
+            authType: 'username',
+            username: '',
+            password: '',
+            rememberPassword: false,
+            proxyType: 'manual'
+        };
+
+        // Load settings
+        function loadSettings() {
+            const saved = localStorage.getItem('vpn_settings');
+            if (saved) {
+                settings = JSON.parse(saved);
+                populateForm();
+            }
+        }
+
+        // Populate form
+        function populateForm() {
+            document.getElementById('vpnType').value = settings.type;
+            document.getElementById('description').value = settings.description;
+            document.getElementById('server').value = settings.server;
+            document.getElementById('remoteId').value = settings.remoteId;
+            document.getElementById('localId').value = settings.localId;
+            document.getElementById('username').value = settings.username;
+            document.getElementById('password').value = settings.password;
+            document.getElementById('authTypeDisplay').textContent = settings.authType === 'username' ? 'Имя пользователя' : settings.authType;
+            
+            if (settings.rememberPassword) {
+                document.getElementById('rememberCheckbox').classList.add('checked');
+            }
+        }
+
+        // Update type
+        function updateType() {
+            settings.type = document.getElementById('vpnType').value;
+        }
+
+        // Toggle remember
+        function toggleRemember() {
+            settings.rememberPassword = !settings.rememberPassword;
+            document.getElementById('rememberCheckbox').classList.toggle('checked');
+        }
+
+        // Set proxy type
+        function setProxyType(type) {
+            settings.proxyType = type;
+            document.querySelectorAll('.segment-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Show auth types
+        function showAuthTypes() {
+            document.getElementById('authTypeModal').classList.add('active');
+        }
+
+        // Select auth type
+        function selectAuthType(type) {
+            settings.authType = type;
+            document.getElementById('authTypeDisplay').textContent = type === 'username' ? 'Имя пользователя' : type;
+            closeModal('authTypeModal');
+        }
+
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function closeSettings() {
+            if (confirm('Закрыть без сохранения?')) {
+                window.close();
+            }
+        }
+
+        function saveAllSettings() {
+            // Validate required fields
+            if (!document.getElementById('description').value || 
+                !document.getElementById('server').value || 
+                !document.getElementById('remoteId').value ||
+                !document.getElementById('username').value ||
+                !document.getElementById('password').value) {
+                alert('Пожалуйста, заполните все обязательные поля');
+                return;
+            }
+
+            settings.description = document.getElementById('description').value;
+            settings.server = document.getElementById('server').value;
+            settings.remoteId = document.getElementById('remoteId').value;
+            settings.localId = document.getElementById('localId').value;
+            settings.username = document.getElementById('username').value;
+            settings.password = document.getElementById('password').value;
+
+            localStorage.setItem('vpn_settings', JSON.stringify(settings));
+            alert('Настройки сохранены');
+            window.close();
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('authTypeModal').addEventListener('click', (e) => {
+            if (e.target.id === 'authTypeModal') {
+                closeModal('authTypeModal');
+            }
+        });
+
+        // Initialize
+        loadSettings();
+    </script>
+</body>
+</html>
