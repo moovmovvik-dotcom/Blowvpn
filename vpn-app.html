@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0A0E27">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BlowVPN">
+    <meta name="description" content="Modern VPN Client - BlowVPN. Fast, secure, and easy to use.">
+    
+    <link rel="icon" type="image/png" href="/icon-192.png">
+    <link rel="apple-touch-icon" href="/icon-180.png">
+    <link rel="manifest" href="/manifest.json">
+    
+    <title>BlowVPN - VPN Client</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-black: #0A0E27;
+            --dark-navy: #1A1F3A;
+            --neon-blue: #00D9FF;
+            --neon-purple: #9D4EDD;
+            --text-light: #E0E0E0;
+            --text-dark: #8B8B8B;
+            --success-green: #06D6A0;
+            --error-red: #FF006E;
+            --disabled-grey: #424242;
+        }
+
+        body {
+            background-color: var(--primary-black);
+            color: var(--text-light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--dark-navy);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 20px;
+            border-top: 1px solid var(--disabled-grey);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            color: var(--text-dark);
+            transition: color 0.3s ease;
+            padding: 10px 15px;
+        }
+
+        .nav-item.active {
+            color: var(--neon-blue);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 80px;
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        /* Home Screen */
+        .home-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100%;
+            padding: 20px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--dark-navy);
+            padding: 12px 20px;
+            border-radius: 24px;
+            border: 1.5px solid var(--disabled-grey);
+            margin-bottom: 60px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--error-red);
+            transition: all 0.3s ease;
+        }
+
+        .status-dot.connected {
+            background-color: var(--success-green);
+            box-shadow: 0 0 8px rgba(6, 214, 160, 0.6);
+        }
+
+        .status-text {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--error-red);
+        }
+
+        .status-text.connected {
+            color: var(--success-green);
+        }
+
+        /* Power Button */
+        .power-button-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 60px 0;
+        }
+
+        .pulse-ring {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border: 2px solid var(--neon-blue);
+            border-radius: 50%;
+            opacity: 0;
+            animation: pulse 1.5s ease-in-out infinite;
+            display: none;
+        }
+
+        .pulse-ring.active {
+            display: block;
+        }
+
+        @keyframes pulse {
+            0% {
+                width: 150px;
+                height: 150px;
+                opacity: 0.8;
+            }
+            100% {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+            }
+        }
+
+        .power-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            background-color: var(--disabled-grey);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 0 0 0 rgba(0, 217, 255, 0);
+        }
+
+        .power-button.connected {
+            background-color: var(--neon-blue);
+            color: var(--primary-black);
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+        }
+
+        .power-button:active {
+            transform: scale(0.95);
+        }
+
+        .uptime {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--neon-blue);
+            font-family: 'Monaco', 'Courier New', monospace;
+            letter-spacing: 2px;
+            margin-top: 40px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: var(--dark-navy);
+            width: 100%;
+            border-radius: 20px 20px 0 0;
+            padding: 24px;
+            animation: slideUp 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-light);
+        }
+
+        .form-label.required::after {
+            content: '*';
+            color: var(--error-red);
+            margin-left: 4px;
+        }
+
+        .form-label.optional {
+            color: var(--text-dark);
+            font-size: 12px;
+        }
+
+        .input-field,
+        .select-field {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-black);
+            border: 1px solid var(--disabled-grey);
+            border-radius: 12px;
+            color: var(--text-light);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .input-field:focus,
+        .select-field:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+        }
+
+        .input-field::placeholder {
+            color: var(--text-dark);
+        }
+
+        .input-field.error,
+        .select-field.error {
+            border-color: var(--error-red);
+            background-color: rgba(255, 0, 110, 0.05);
+        }
+
+        .error-message {
+            color: var(--error-red);
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--neon-blue);
+            color: var(--primary-black);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: var(--disabled-grey);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:active {
+            opacity: 0.8;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Settings Screen */
+        .settings-screen {
+            padding: 20px;
+        }
+
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .settings-title {
+            font-size: 12px;
+            color: var(--text-dark);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            padding-left: 16px;
+        }
+
+        .settings-item {
+            background-color: var(--dark-navy);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 1px solid var(--disabled-grey);
+        }
+
+        .settings-item:active {
+            background-color: rgba(0, 217, 255, 0.1);
+        }
+
+        .settings-label {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .settings-value {
+            color: var(--text-dark);
+            font-size: 12px;
+        }
+
+        .toggle {
+            width: 50px;
+            height: 30px;
+            background-color: var(--disabled-grey);
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .toggle.active {
+            background-color: var(--neon-blue);
+        }
+
+        .toggle-circle {
+            width: 26px;
+            height: 26px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s ease;
+        }
+
+        .toggle.active .toggle-circle {
+            left: 22px;
+        }
+
+        /* Servers Screen */
+        .servers-screen {
+            padding: 20px;
+        }
+
+        .screen-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        .server-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .server-item {
+            background-color: var(--dark-navy);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+        }
+
+        .server-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .server-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .ping-badge {
+            background-color: rgba(6, 214, 160, 0.1);
+            border: 1px solid var(--success-green);
+            color: var(--success-green);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .ping-badge.offline {
+            background-color: rgba(255, 0, 110, 0.1);
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .server-details {
+            font-size: 13px;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .server-time {
+            font-size: 12px;
+            color: var(--text-dark);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dark);
+        }
+
+        .empty-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Payment Screen */
+        .payment-screen {
+            padding: 20px;
+        }
+
+        .gradient-box {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1) 0%, rgba(157, 78, 221, 0.1) 100%);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 60px;
+            margin-top: 20px;
+        }
+
+        .payment-icon {
+            font-size: 80px;
+            margin-bottom: 24px;
+            opacity: 0.8;
+        }
+
+        .status-box {
+            background-color: var(--dark-navy);
+            border: 1px solid var(--disabled-grey);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 60px;
+        }
+
+        .status-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .status-dot-info {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #FFA500;
+        }
+
+        .btn-payment {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--neon-blue);
+            color: var(--primary-black);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-payment:active {
+            transform: scale(0.98);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary-black);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--disabled-grey);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-blue);
+        }
+
+        /* iOS Safe Area */
+        @supports (padding: max(0px)) {
+            .bottom-nav {
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+            .content {
+                padding-bottom: max(80px, 80px + env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Home Screen -->
+        <div class="content active" id="home">
+            <div class="home-screen">
+                <div class="status-badge">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span class="status-text" id="statusText">VPN Disconnected</span>
+                </div>
+
+                <div class="power-button-container">
+                    <div class="pulse-ring" id="pulseRing"></div>
+                    <button class="power-button" id="powerBtn">⏻</button>
+                </div>
+
+                <div class="uptime" id="uptime">00:00:00</div>
+            </div>
+        </div>
+
+        <!-- Servers Screen -->
+        <div class="content" id="servers">
+            <div class="servers-screen">
+                <h2 class="screen-title">VPN Servers</h2>
+                <div class="server-list" id="serverList">
+                    <div class="empty-state">
+                        <div class="empty-icon">☁️</div>
+                        <h3>No Subscription Added</h3>
+                        <p>Add a VPN subscription to see available servers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div class="content" id="settings">
+            <div class="settings-screen">
+                <h2 class="screen-title">Settings</h2>
+
+                <!-- Connection Settings -->
+                <div class="settings-section">
+                    <div class="settings-title">Connection</div>
+                    <div class="settings-item" onclick="openModal('addServerModal')">
+                        <div>
+                            <div class="settings-label">Add Server</div>
+                            <div class="settings-value">Add new VPN configuration</div>
+                        </div>
+                        <span>›</span>
+                    </div>
+                    <div class="settings-item" onclick="openModal('authModal')">
+                        <div>
+                            <div class="settings-label">Authentication</div>
+                            <div class="settings-value">Username & Password</div>
+                        </div>
+                        <span>›</span>
+                    </div>
+                </div>
+
+                <!-- Proxy Settings -->
+                <div class="settings-section">
+                    <div class="settings-title">Proxy</div>
+                    <div class="settings-item">
+                        <div>
+                            <div class="settings-label">Proxy Type</div>
+                            <div class="settings-value" id="proxyTypeValue">Manual</div>
+                        </div>
+                        <span>›</span>
+                    </div>
+                    <div class="settings-item">
+                        <div class="settings-label">Auto-Connect</div>
+                        <div class="settings-value">Always connect</div>
+                        <div class="toggle" id="autoConnectToggle" onclick="toggleAutoConnect(event)">
+                            <div class="toggle-circle"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- General Settings -->
+                <div class="settings-section">
+                    <div class="settings-title">General</div>
+                    <div class="settings-item" onclick="clearAllData()">
+                        <div>
+                            <div class="settings-label">Clear Data</div>
+                            <div class="settings-value">Remove all saved data</div>
+                        </div>
+                        <span>›</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Screen -->
+        <div class="content" id="payment">
+            <div class="payment-screen">
+                <div class="gradient-box">
+                    <div class="payment-icon">💳</div>
+                    <h2 class="screen-title">Subscription Management</h2>
+                    <p style="font-size: 14px; color: var(--text-light); line-height: 1.6;">
+                        Renew your subscription or purchase a new VPN key through our Telegram bot
+                    </p>
+                </div>
+
+                <div class="status-box">
+                    <div class="status-title">Current Status</div>
+                    <div class="status-info">
+                        <div class="status-dot-info"></div>
+                        <span>Subscription expires in 45 days</span>
+                    </div>
+                </div>
+
+                <button class="btn-payment" onclick="window.open('https://t.me/NaixVPN_bot', '_blank')">
+                    <span>📤</span>
+                    <span>Open Payment Bot</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active" data-tab="home" onclick="switchTab('home')">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">Home</div>
+            </div>
+            <div class="nav-item" data-tab="servers" onclick="switchTab('servers')">
+                <div class="nav-icon">🔄</div>
+                <div class="nav-label">Servers</div>
+            </div>
+            <div class="nav-item" data-tab="settings" onclick="switchTab('settings')">
+                <div class="nav-icon">⚙️</div>
+                <div class="nav-label">Settings</div>
+            </div>
+            <div class="nav-item" data-tab="payment" onclick="switchTab('payment')">
+                <div class="nav-icon">💳</div>
+                <div class="nav-label">Payment</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add Server Modal -->
+    <div class="modal" id="addServerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Server</h3>
+                <button class="modal-close" onclick="closeModal('addServerModal')">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label required">Type</label>
+                <select class="select-field" id="serverType">
+                    <option value="ikev2">IKEv2</option>
+                    <option value="vless">VLESS</option>
+                    <option value="vmess">VMESS</option>
+                    <option value="ss">Shadowsocks</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label required">Description</label>
+                <input type="text" class="input-field" id="serverDescription" placeholder="e.g., US Server 1">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label required">Server Address</label>
+                <input type="text" class="input-field" id="serverAddress" placeholder="example.com or 192.168.1.1">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label required">Remote ID</label>
+                <input type="text" class="input-field" id="remoteId" placeholder="your-remote-id">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label optional">Local ID</label>
+                <input type="text" class="input-field" id="localId" placeholder="optional">
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="closeModal('addServerModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveServer()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Authentication</h3>
+                <button class="modal-close" onclick="closeModal('authModal')">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <span>Authentication Type</span>
+                    <span class="settings-value" style="display: block; margin-top: 4px;">Username</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label required">Username</label>
+                <input type="text" class="input-field" id="username" placeholder="Enter username">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label required">Password</label>
+                <input type="password" class="input-field" id="password" placeholder="Enter password">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" id="rememberPassword" style="margin-right: 8px;">
+                    <span>Always ask for password</span>
+                </label>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="closeModal('authModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAuth()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let isConnected = false;
+        let uptimeSeconds = 0;
+        let uptimeInterval = null;
+        let servers = [];
+        let autoConnectEnabled = false;
+
+        // Load saved data
+        function loadData() {
+            const saved = localStorage.getItem('blowvpn_servers');
+            if (saved) {
+                servers = JSON.parse(saved);
+                renderServers();
+            }
+
+            autoConnectEnabled = localStorage.getItem('blowvpn_autoConnect') === 'true';
+            updateAutoConnectUI();
+        }
+
+        // Switch Tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Close modal on backdrop click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Power Button Logic
+        document.getElementById('powerBtn').addEventListener('click', () => {
+            isConnected = !isConnected;
+            updateUI();
+
+            if (isConnected) {
+                uptimeSeconds = 0;
+                startUptimeTimer();
+            } else {
+                stopUptimeTimer();
+                uptimeSeconds = 0;
+            }
+        });
+
+        function updateUI() {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            const btn = document.getElementById('powerBtn');
+            const ring = document.getElementById('pulseRing');
+
+            if (isConnected) {
+                dot.classList.add('connected');
+                text.classList.add('connected');
+                text.textContent = 'VPN Connected';
+                btn.classList.add('connected');
+                ring.classList.add('active');
+            } else {
+                dot.classList.remove('connected');
+                text.classList.remove('connected');
+                text.textContent = 'VPN Disconnected';
+                btn.classList.remove('connected');
+                ring.classList.remove('active');
+            }
+        }
+
+        function startUptimeTimer() {
+            uptimeInterval = setInterval(() => {
+                uptimeSeconds++;
+                updateUptimeDisplay();
+            }, 1000);
+        }
+
+        function stopUptimeTimer() {
+            if (uptimeInterval) {
+                clearInterval(uptimeInterval);
+            }
+        }
+
+        function updateUptimeDisplay() {
+            const hours = Math.floor(uptimeSeconds / 3600);
+            const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+            const seconds = uptimeSeconds % 60;
+
+            const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('uptime').textContent = formatted;
+        }
+
+        // Server Management
+        function saveServer() {
+            const type = document.getElementById('serverType').value;
+            const description = document.getElementById('serverDescription').value;
+            const address = document.getElementById('serverAddress').value;
+            const remoteId = document.getElementById('remoteId').value;
+            const localId = document.getElementById('localId').value;
+
+            if (!description || !address || !remoteId) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const newServer = {
+                id: Date.now().toString(),
+                type,
+                description,
+                address,
+                remoteId,
+                localId,
+                ping: null,
+                lastChecked: null
+            };
+
+            servers.push(newServer);
+            localStorage.setItem('blowvpn_servers', JSON.stringify(servers));
+            renderServers();
+            closeModal('addServerModal');
+
+            // Clear form
+            document.getElementById('serverType').value = 'ikev2';
+            document.getElementById('serverDescription').value = '';
+            document.getElementById('serverAddress').value = '';
+            document.getElementById('remoteId').value = '';
+            document.getElementById('localId').value = '';
+        }
+
+        function saveAuth() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const rememberPassword = document.getElementById('rememberPassword').checked;
+
+            if (!username || !password) {
+                alert('Please enter username and password');
+                return;
+            }
+
+            localStorage.setItem('blowvpn_username', username);
+            localStorage.setItem('blowvpn_password', btoa(password)); // Simple encoding
+            localStorage.setItem('blowvpn_rememberPassword', rememberPassword);
+
+            closeModal('authModal');
+        }
+
+        function renderServers() {
+            const list = document.getElementById('serverList');
+            
+            if (servers.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">☁️</div>
+                        <h3>No Servers Added</h3>
+                        <p>Add a VPN server from settings to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = servers.map(server => `
+                <div class="server-item">
+                    <div class="server-header">
+                        <div>
+                            <div class="server-name">${server.description}</div>
+                            <div class="server-details">${server.address} • ${server.type.toUpperCase()}</div>
+                        </div>
+                        <div class="ping-badge">
+                            ${server.ping ? server.ping + ' ms' : 'N/A'}
+                        </div>
+                    </div>
+                    <div class="server-time">${server.lastChecked ? 'Last checked: ' + new Date(server.lastChecked).toLocaleTimeString() : 'Never checked'}</div>
+                </div>
+            `).join('');
+        }
+
+        function toggleAutoConnect(e) {
+            e.stopPropagation();
+            autoConnectEnabled = !autoConnectEnabled;
+            localStorage.setItem('blowvpn_autoConnect', autoConnectEnabled);
+            updateAutoConnectUI();
+        }
+
+        function updateAutoConnectUI() {
+            const toggle = document.getElementById('autoConnectToggle');
+            if (autoConnectEnabled) {
+                toggle.classList.add('active');
+            } else {
+                toggle.classList.remove('active');
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                localStorage.clear();
+                servers = [];
+                renderServers();
+                location.reload();
+            }
+        }
+
+        // Initialize
+        loadData();
+        updateUI();
+    </script>
+</body>
+</html>
