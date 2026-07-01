@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#F5F5F7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BlowVPN">
+    
+    <title>BlowVPN Client</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #F5F5F7;
+            color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 100%;
+            min-height: 100vh;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background-color: #F5F5F7;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #E5E5EA;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .header-btn:active {
+            background-color: #E5E5EA;
+        }
+
+        .header-btn.save {
+            background-color: #007AFF;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            width: auto;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        .header-btn.save:active {
+            background-color: #0051D5;
+        }
+
+        /* Scroll Content */
+        .scroll-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            padding: 0 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* Form Group */
+        .form-group {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #E5E5EA;
+            margin-bottom: 12px;
+        }
+
+        .form-row {
+            padding: 16px;
+            border-bottom: 1px solid #E5E5EA;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 54px;
+        }
+
+        .form-row:last-child {
+            border-bottom: none;
+        }
+
+        .form-row.interactive {
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .form-row.interactive:active {
+            background-color: #F5F5F7;
+        }
+
+        .form-label {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+        }
+
+        .label-main {
+            font-size: 16px;
+            font-weight: 500;
+            color: #000;
+        }
+
+        .label-sub {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .label-required {
+            font-size: 13px;
+            color: #FF3B30;
+        }
+
+        .form-value {
+            font-size: 16px;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 12px;
+        }
+
+        .form-value.selected {
+            color: #007AFF;
+            font-weight: 500;
+        }
+
+        .chevron {
+            color: #C7C7CC;
+            font-size: 20px;
+        }
+
+        /* Input Fields */
+        .input-wrapper {
+            padding: 12px 16px;
+            border-bottom: 1px solid #E5E5EA;
+        }
+
+        .input-wrapper:last-child {
+            border-bottom: none;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            border: none;
+            background-color: white;
+            font-size: 16px;
+            font-family: inherit;
+            color: #000;
+            padding: 4px 0;
+        }
+
+        .input-wrapper input::placeholder {
+            color: #999;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+        }
+
+        .input-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        /* Auth Section */
+        .auth-section {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #E5E5EA;
+        }
+
+        .auth-row {
+            padding: 16px;
+            border-bottom: 1px solid #E5E5EA;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            min-height: 54px;
+        }
+
+        .auth-row:last-child {
+            border-bottom: none;
+        }
+
+        .auth-row:active {
+            background-color: #F5F5F7;
+        }
+
+        .auth-label {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 300;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            width: 100%;
+            border-radius: 20px 20px 0 0;
+            padding: 0;
+            animation: slideUp 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid #E5E5EA;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background-color: white;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 16px;
+        }
+
+        .modal-option {
+            padding: 16px;
+            border-bottom: 1px solid #E5E5EA;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .modal-option:last-child {
+            border-bottom: none;
+        }
+
+        .modal-option:active {
+            background-color: #F5F5F7;
+        }
+
+        .modal-check {
+            color: #007AFF;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background-color: #34C759;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            animation: slideUp 0.3s ease, slideDown 0.3s ease 2.7s;
+            z-index: 400;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(0); }
+            to { transform: translateY(200%); }
+        }
+
+        /* iOS Safe Area */
+        @supports (padding: max(0px)) {
+            .scroll-content {
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+            }
+            .header {
+                padding-top: max(16px, env(safe-area-inset-top));
+            }
+        }
+
+        .error-text {
+            color: #FF3B30;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-text.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">Server Configuration</div>
+            <button class="header-btn save" onclick="saveConfiguration()">Save</button>
+        </div>
+
+        <!-- Content -->
+        <div class="scroll-content">
+            <!-- Description and Server Section -->
+            <div class="section">
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <label class="input-label">Описание</label>
+                        <input type="text" id="description" placeholder="e.g., US Server 1">
+                    </div>
+                    <div class="input-wrapper">
+                        <label class="input-label">Сервер</label>
+                        <input type="text" id="server" placeholder="example.com or 192.168.1.1">
+                    </div>
+                    <div class="input-wrapper">
+                        <label class="input-label">Удаленный ID</label>
+                        <input type="text" id="remoteId" placeholder="UUID or ID">
+                    </div>
+                    <div class="input-wrapper">
+                        <label class="input-label">Локальный ID</label>
+                        <input type="text" id="localId" placeholder="Optional">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Authentication Section -->
+            <div class="section">
+                <div class="section-title">Аутентификация</div>
+                
+                <div class="auth-section">
+                    <!-- Auth Type Selector -->
+                    <div class="auth-row" onclick="openAuthTypeModal()">
+                        <div class="auth-label">
+                            <span class="label-main">Аутентификация</span>
+                        </div>
+                        <div class="form-value">
+                            <span id="authTypeDisplay">Имя пользователя</span>
+                            <span class="chevron">›</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auth Credentials -->
+                <div class="form-group" style="margin-top: 12px;">
+                    <div class="input-wrapper">
+                        <label class="input-label">
+                            Имя пользователя
+                            <span class="label-required">Обязательно</span>
+                        </label>
+                        <input type="text" id="username" placeholder="Enter your username">
+                        <div class="error-text" id="usernameError">Username is required</div>
+                    </div>
+                    <div class="input-wrapper">
+                        <label class="input-label">Пароль</label>
+                        <input type="password" id="password" placeholder="Enter your password">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Type Modal -->
+    <div class="modal" id="authTypeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Аутентификация</div>
+                <button class="header-btn" onclick="closeAuthTypeModal()" style="width: 44px; height: 44px;">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-option" onclick="selectAuthType('username')">
+                    <span class="label-main">Имя пользователя</span>
+                    <span class="modal-check" id="check-username">✓</span>
+                </div>
+                <div class="modal-option" onclick="selectAuthType('certificate')">
+                    <span class="label-main">Сертификат</span>
+                    <span class="modal-check" id="check-certificate" style="opacity: 0;">✓</span>
+                </div>
+                <div class="modal-option" onclick="selectAuthType('anonymous')">
+                    <span class="label-main">Анонимно</span>
+                    <span class="modal-check" id="check-anonymous" style="opacity: 0;">✓</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+        ✓ Configuration saved successfully
+    </div>
+
+    <script>
+        let config = {
+            description: '',
+            server: '',
+            remoteId: '',
+            localId: '',
+            authType: 'username',
+            username: '',
+            password: ''
+        };
+
+        // Load configuration
+        function loadConfiguration() {
+            const saved = localStorage.getItem('vpn_config');
+            if (saved) {
+                config = JSON.parse(saved);
+                populateForm();
+            }
+        }
+
+        // Populate form
+        function populateForm() {
+            document.getElementById('description').value = config.description;
+            document.getElementById('server').value = config.server;
+            document.getElementById('remoteId').value = config.remoteId;
+            document.getElementById('localId').value = config.localId;
+            document.getElementById('username').value = config.username;
+            document.getElementById('password').value = config.password;
+            updateAuthTypeDisplay();
+        }
+
+        // Open auth type modal
+        function openAuthTypeModal() {
+            document.getElementById('authTypeModal').classList.add('active');
+        }
+
+        // Close auth type modal
+        function closeAuthTypeModal() {
+            document.getElementById('authTypeModal').classList.remove('active');
+        }
+
+        // Select auth type
+        function selectAuthType(type) {
+            config.authType = type;
+            updateAuthTypeDisplay();
+            updateAuthCheckmarks();
+            closeAuthTypeModal();
+        }
+
+        // Update auth type display
+        function updateAuthTypeDisplay() {
+            const displays = {
+                'username': 'Имя пользователя',
+                'certificate': 'Сертификат',
+                'anonymous': 'Анонимно'
+            };
+            document.getElementById('authTypeDisplay').textContent = displays[config.authType] || 'Имя пользователя';
+        }
+
+        // Update checkmarks
+        function updateAuthCheckmarks() {
+            document.getElementById('check-username').style.opacity = config.authType === 'username' ? '1' : '0';
+            document.getElementById('check-certificate').style.opacity = config.authType === 'certificate' ? '1' : '0';
+            document.getElementById('check-anonymous').style.opacity = config.authType === 'anonymous' ? '1' : '0';
+        }
+
+        // Save configuration
+        function saveConfiguration() {
+            // Validate required fields
+            const username = document.getElementById('username').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const server = document.getElementById('server').value.trim();
+            const remoteId = document.getElementById('remoteId').value.trim();
+
+            if (!username) {
+                document.getElementById('usernameError').classList.add('show');
+                return;
+            } else {
+                document.getElementById('usernameError').classList.remove('show');
+            }
+
+            if (!description || !server || !remoteId) {
+                alert('Please fill in all required fields (Description, Server, Remote ID)');
+                return;
+            }
+
+            config.description = description;
+            config.server = server;
+            config.remoteId = remoteId;
+            config.localId = document.getElementById('localId').value.trim();
+            config.username = username;
+            config.password = document.getElementById('password').value;
+
+            localStorage.setItem('vpn_config', JSON.stringify(config));
+            
+            // Show success message
+            const successMsg = document.getElementById('successMessage');
+            successMsg.classList.add('show');
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('authTypeModal').addEventListener('click', (e) => {
+            if (e.target.id === 'authTypeModal') {
+                closeAuthTypeModal();
+            }
+        });
+
+        // Initialize
+        loadConfiguration();
+    </script>
+</body>
+</html>
